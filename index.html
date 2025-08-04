@@ -22,20 +22,20 @@
       --pre-text: #f8f8f2;
     }
 
-    .dark-mode {
-      --bg: #1a1a1a;
-      --text: #e0e0e0;
-      --link: #3498db;
-      --link-hover: #e67e22;
-      --border: #444;
-      --box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      --header-border: #9b59b6;
-      --panel-bg: #2d2d2d;
-      --sidebar-bg: #222;
-      --code-bg: #333;
-      --pre-bg: #1e1e1e;
-      --pre-text: #dcdcdc;
-    }
+.dark-mode {
+  --bg: #1a1a1a;
+  --text: #e0e0e0;
+  --link: #3498db;
+  --link-hover: #e67e22;
+  --border: #444;
+  --box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --header-border: #9b59b6;
+  --panel-bg: #2d2d2d;
+  --sidebar-bg: #222;
+  --code-bg: #333;
+  --pre-bg: #1e1e1e;
+  --pre-text: #dcdcdc;
+}
 
     * {
       box-sizing: border-box;
@@ -80,23 +80,24 @@
       text-decoration: underline;
     }
 
-    pre {
-      background-color: var(--pre-bg);
-      color: var(--pre-text);
-      padding: 12px;
-      border-radius: 6px;
-      overflow-x: auto;
-      font-family: "Courier New", monospace;
-      font-size: 0.95em;
-    }
+code {
+  background-color: #f5f5f5; /* 浅灰色背景 */
+  color: #333; /* 黑色文字 */
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+  font-size: 0.95em;
+}
 
-    code {
-      background-color: var(--code-bg);
-      padding: 2px 5px;
-      border-radius: 4px;
-      font-family: "Courier New", monospace;
-      font-size: 0.95em;
-    }
+pre {
+  background-color: #2d2d2d; /* 深灰色背景 */
+  color: #f8f8f2; /* 浅灰色文字 */
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: "Courier New", monospace;
+  font-size: 0.95em;
+}
 
     blockquote {
       border-left: 4px solid var(--link);
@@ -266,6 +267,15 @@
         background: #f5f5f5 !important;
         color: #333 !important;
       }
+      .dark-mode code {
+  background-color: #333; /* 深灰色背景 */
+  color: #f8f8f2; /* 浅灰色文字 */
+}
+
+.dark-mode pre {
+  background-color: #1e1e1e; /* 更深的背景 */
+  color: #f8f8f2; /* 浅灰色文字 */
+}
     }
   </style>
 </head>
