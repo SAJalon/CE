@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CEBOOK</title>
+  <title>📖CEBOOK</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.5.7/dist/purify.min.js"></script>
   <style>
@@ -273,11 +273,11 @@
   <div class="container">
     <!-- 侧边栏 -->
     <aside class="sidebar">
-      <h1>CEBOOK</h1>
+      <h1>📖CEBOOK</h1>
 
       <input type="text" id="search" placeholder="🔍 搜索章节..." />
 
-      <button class="theme-toggle" onclick="toggleDarkMode()">🌙 暗色模式</button>
+      <button class="theme-toggle" onclick="toggleDarkMode()">🌙 暗黑模式</button>
 
       <div class="toc" id="toc">
         <p class="loading">加载目录中...</p>
@@ -300,11 +300,12 @@
   <div class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
 
   <script>
-    // ===== 配置区（请确保正确）=====
+    // ===== 配置区 =====
     const username = 'SAJalon';
     const repo = 'CE';
     const baseUrl = `https://api.github.com/repos/${username}/${repo}/contents`;
-    // ===============================
+    const token = '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';
+    // ===================
 
     let allSections = [];
 
@@ -345,7 +346,12 @@
     });
 
     // 获取根目录
-    fetch(baseUrl)
+    fetch(baseUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    })
       .then(res => {
         if (!res.ok) {
           throw new Error(`GitHub API 错误: ${res.status} ${res.statusText}`);
@@ -353,7 +359,6 @@
         return res.json();
       })
       .then(data => {
-        // ✅ 关键：确保 data 是数组
         if (!Array.isArray(data)) {
           throw new Error('GitHub API 返回的数据不是数组。可能是：<br>• 仓库是私有的<br>• 仓库名或用户名错误');
         }
@@ -368,7 +373,9 @@
         // 加载 README.md 作为封面
         const readmeItem = data.find(item => item.name.toLowerCase() === 'readme.md');
         if (readmeItem) {
-          fetch(readmeItem.download_url)
+          fetch(readmeItem.download_url, {
+            headers: { 'Authorization': `token ${token}` }
+          })
             .then(r => r.text())
             .then(md => {
               const contentDiv = document.getElementById('content');
@@ -396,7 +403,12 @@
           `;
           tocContainer.insertAdjacentHTML('beforeend', chapterHtml);
 
-          fetch(`${baseUrl}/${encodeURIComponent(folder.name)}?ref=main`)
+          fetch(`${baseUrl}/${encodeURIComponent(folder.name)}?ref=main`, {
+            headers: {
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          })
             .then(res => {
               if (!res.ok) throw new Error(`HTTP ${res.status}`);
               return res.json();
@@ -417,12 +429,9 @@
               }
 
               const fileLinks = mdFiles.map(file => {
-                const filePath = `${folder.name}/${file.name}`;
                 const displayName = file.name.replace(/\.md$/, '');
                 const cleanName = displayName.replace(/^\d+-/, '').trim();
-
-                // ✅ 安全生成 ID（支持中文）
-                const linkId = `link-${btoa(encodeURIComponent(filePath)).replace(/=/g, '')}`;
+                const linkId = `link-${btoa(encodeURIComponent(file.path)).replace(/=/g, '')}`;
 
                 allSections.push({ name: cleanName, path: file.download_url, elementId: linkId });
 
@@ -443,9 +452,7 @@
           <p style="color:red;">
             <strong>❌ 加载失败：</strong>${err.message}<br><br>
             <strong>可能原因：</strong><br>
-            • 仓库 <code>${username}/${repo}</code> 是私有的（必须设为 Public）<br>
-            • 用户名或仓库名拼写错误<br>
-            • GitHub API 限流（频繁刷新）<br>
+            • GitHub 限流<br>
             • 网络问题
           </p>
         `;
@@ -456,13 +463,14 @@
       const contentDiv = document.getElementById('content');
       contentDiv.innerHTML = '<p class="loading">加载内容中...</p>';
 
-      fetch(url)
+      fetch(url, {
+        headers: { 'Authorization': `token ${token}` }
+      })
         .then(res => res.text())
         .then(text => {
           const cleanHtml = DOMPurify.sanitize(marked.parse(text));
           contentDiv.innerHTML = cleanHtml;
 
-          // 高亮当前章节
           setTimeout(() => {
             document.querySelectorAll('.section-list a').forEach(a => a.style.fontWeight = 'normal');
             const linkEl = document.getElementById(linkId);
