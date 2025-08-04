@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh" id="html-root">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,52 +7,386 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.5.7/dist/purify.min.js"></script>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; }
-    h1 { text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-    .toc { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
-    .chapter h3 { color: #2980b9; margin-top: 0; }
-    .section-list a { display: block; margin: 4px 0; color: #16a085; text-decoration: none; padding: 2px 0; }
-    .section-list a:hover { color: #e74c3c; }
-    #content { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .loading { color: #7f8c8d; font-style: italic; }
+    :root {
+      --bg: #f9f9fb;
+      --text: #333;
+      --link: #16a085;
+      --link-hover: #e74c3c;
+      --border: #ddd;
+      --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      --header-border: #3498db;
+      --panel-bg: #fff;
+      --sidebar-bg: #f0f4f8;
+      --code-bg: #f5f5f5;
+      --pre-bg: #2d2d2d;
+      --pre-text: #f8f8f2;
+    }
+
+    .dark-mode {
+      --bg: #1a1a1a;
+      --text: #e0e0e0;
+      --link: #3498db;
+      --link-hover: #e67e22;
+      --border: #444;
+      --box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --header-border: #9b59b6;
+      --panel-bg: #2d2d2d;
+      --sidebar-bg: #222;
+      --code-bg: #333;
+      --pre-bg: #1e1e1e;
+      --pre-text: #dcdcdc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-top: 1.5em;
+      margin-bottom: 0.8em;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      border-bottom-color: var(--header-border);
+    }
+
+    h2 {
+      color: var(--link);
+      font-size: 1.4em;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
+
+    pre {
+      background-color: var(--pre-bg);
+      color: var(--pre-text);
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: "Courier New", monospace;
+      font-size: 0.95em;
+    }
+
+    code {
+      background-color: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.95em;
+    }
+
+    blockquote {
+      border-left: 4px solid var(--link);
+      margin: 1em 0;
+      padding: 0.5em 1em;
+      background-color: rgba(22, 160, 133, 0.1);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    @media (min-width: 900px) {
+      .container {
+        flex-direction: row;
+      }
+    }
+
+    .sidebar {
+      width: 100%;
+      background-color: var(--sidebar-bg);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+      order: 2;
+    }
+
+    @media (min-width: 900px) {
+      .sidebar {
+        width: 280px;
+        position: sticky;
+        top: 20px;
+        height: calc(100vh - 40px);
+        overflow-y: auto;
+        order: 1;
+      }
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      order: 1;
+    }
+
+    @media (min-width: 900px) {
+      .main-content {
+        padding: 30px 40px;
+        order: 2;
+      }
+    }
+
+    .toc {
+      margin-bottom: 20px;
+    }
+
+    .chapter {
+      margin-bottom: 18px;
+    }
+
+    .chapter h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.1em;
+      color: var(--link);
+    }
+
+    .section-list {
+      margin: 0 0 0 16px;
+      padding-left: 8px;
+      border-left: 2px solid var(--border);
+      font-size: 0.95em;
+    }
+
+    .section-list a {
+      display: block;
+      padding: 3px 0;
+    }
+
+    .section-list a:hover {
+      color: var(--link-hover);
+    }
+
+    .loading {
+      text-align: center;
+      color: #7f8c8d;
+      font-style: italic;
+      padding: 10px 0;
+    }
+
+    #search {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background-color: var(--panel-bg);
+      color: var(--text);
+    }
+
+    .theme-toggle {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: var(--link);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-bottom: 20px;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--link-hover);
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: var(--link);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+    }
+
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      color: #95a5a6;
+      font-size: 0.9em;
+      padding: 20px 0;
+    }
+
+    @media print {
+      .sidebar, .back-to-top, .theme-toggle, #search {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        -webkit-print-color-adjust: exact;
+      }
+      #html-root.dark-mode {
+        background: white !important;
+        color: black !important;
+      }
+      pre, code {
+        background: #f5f5f5 !important;
+        color: #333 !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>📖CEBOOK</h1>
+  <div class="container">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+      <h1>📖CEBOOK</h1>
 
-  <div class="toc" id="toc">
-    <p class="loading">加载目录中...</p>
+      <input type="text" id="search" placeholder="🔍 搜索章节..." />
+
+      <button class="theme-toggle" onclick="toggleDarkMode()">🌙 暗色模式</button>
+
+      <div class="toc" id="toc">
+        <p class="loading">加载目录中...</p>
+      </div>
+
+      <footer>
+        © 2025 SAJalon.
+      </footer>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+      <div id="content">
+        <p>欢迎阅读本书。请在左侧选择章节开始阅读。</p>
+      </div>
+    </main>
   </div>
 
-  <div id="content">
-    <p>点击左侧章节开始阅读。</p>
-  </div>
+  <!-- 返回顶部按钮 -->
+  <div class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
 
   <script>
+    // ===== 配置区 =====
     const username = 'SAJalon';
     const repo = 'CE';
     const baseUrl = `https://api.github.com/repos/${username}/${repo}/contents`;
+    // ===================
 
-    // ✅ 安全的 ID 生成函数：处理中文和特殊字符
-    function createId(path) {
-      return 'link-' + btoa(encodeURIComponent(path)).replace(/=/g, '');
+    let allSections = [];
+
+    // 检查本地存储的模式
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.documentElement.classList.add('dark-mode');
     }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark-mode');
+      if (document.documentElement.classList.contains('dark-mode')) {
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    }
+
+    // 显示返回顶部按钮
+    window.addEventListener('scroll', () => {
+      const btn = document.querySelector('.back-to-top');
+      btn.classList.toggle('visible', window.scrollY > 300);
+    });
+
+    // 搜索功能
+    document.getElementById('search').addEventListener('input', function (e) {
+      const query = e.target.value.toLowerCase();
+      if (!query) {
+        document.querySelectorAll('.chapter').forEach(ch => ch.style.display = '');
+        return;
+      }
+      document.querySelectorAll('.chapter').forEach(ch => {
+        const title = ch.querySelector('h3').textContent.toLowerCase();
+        const links = Array.from(ch.querySelectorAll('.section-list a'))
+          .map(a => a.textContent.toLowerCase());
+        const matches = links.some(t => t.includes(query)) || title.includes(query);
+        ch.style.display = matches ? '' : 'none';
+      });
+    });
 
     // 获取根目录
     fetch(baseUrl)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`GitHub API 错误: ${res.status} ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(data => {
         if (!Array.isArray(data)) {
-          throw new Error('仓库不存在或为私有');
+          throw new Error('GitHub API 返回的数据不是数组。可能是：<br>• 仓库是私有的<br>• 仓库名或用户名错误');
         }
 
-        const folders = data.filter(item => item.type === 'dir').sort((a, b) => a.name.localeCompare(b.name));
+        const folders = data
+          .filter(item => item.type === 'dir')
+          .sort((a, b) => a.name.localeCompare(b.name));
+
         const tocContainer = document.getElementById('toc');
         tocContainer.innerHTML = '';
 
+        // 加载 README.md 作为封面
+        const readmeItem = data.find(item => item.name.toLowerCase() === 'readme.md');
+        if (readmeItem) {
+          fetch(readmeItem.download_url)
+            .then(r => r.text())
+            .then(md => {
+              const contentDiv = document.getElementById('content');
+              contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(md));
+            })
+            .catch(err => {
+              console.warn('加载 README.md 失败', err);
+            });
+        }
+
+        if (folders.length === 0) {
+          tocContainer.innerHTML = '<p>未找到章节目录（没有子文件夹）。</p>';
+          return;
+        }
+
         folders.forEach(folder => {
+          const folderId = `folder-${folder.name.replace(/[^a-z0-9]/gi, '-')}`;
           const chapterHtml = `
-            <div class="chapter">
+            <div class="chapter" id="${folderId}">
               <h3>${folder.name}</h3>
               <div class="section-list" id="list-${folder.name}">
                 <p class="loading">加载中...</p>
@@ -62,37 +396,57 @@
           tocContainer.insertAdjacentHTML('beforeend', chapterHtml);
 
           fetch(`${baseUrl}/${encodeURIComponent(folder.name)}?ref=main`)
-            .then(res => res.json())
+            .then(res => {
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              return res.json();
+            })
             .then(files => {
+              if (!Array.isArray(files)) {
+                throw new Error('文件夹内容不是数组');
+              }
+
               const mdFiles = files
                 .filter(file => file.name.endsWith('.md'))
                 .sort((a, b) => a.name.localeCompare(b.name));
 
               const listContainer = document.getElementById(`list-${folder.name}`);
               if (mdFiles.length === 0) {
-                listContainer.innerHTML = '<em>暂无内容</em>';
+                listContainer.innerHTML = '<em>暂无 .md 文件</em>';
                 return;
               }
 
               const fileLinks = mdFiles.map(file => {
-                const filePath = `${folder.name}/${file.name}`;
-                const title = file.name.replace(/\.md$/, '').replace(/^\d+-/, '').trim();
-                const linkId = createId(filePath); // ✅ 使用安全的 ID 生成
+                const displayName = file.name.replace(/\.md$/, '');
+                const cleanName = displayName.replace(/^\d+-/, '').trim();
+                // ✅ 使用 btoa(encodeURIComponent(file.path)) 安全生成 ID
+                const linkId = `link-${btoa(encodeURIComponent(file.path)).replace(/=/g, '')}`;
 
-                return `<a id="${linkId}" href="#" onclick="loadContent('${file.download_url}', '${linkId}'); return false;">${title}</a>`;
+                allSections.push({ name: cleanName, path: file.download_url, elementId: linkId });
+
+                // ✅ 关键：使用 file.download_url，避免手动拼接路径
+                return `<a id="${linkId}" href="#" onclick="loadContent('${file.download_url}', '${linkId}'); return false;">${cleanName}</a>`;
               }).join('');
 
               listContainer.innerHTML = fileLinks;
             })
             .catch(err => {
-              listContainer.innerHTML = '<em>加载失败</em>';
-              console.error('加载章节失败:', err);
+              console.error(`加载章节失败: ${folder.name}`, err);
+              document.getElementById(`list-${folder.name}`).innerHTML = `<em style="color:red;">加载失败</em>`;
             });
         });
       })
       .catch(err => {
-        document.getElementById('toc').innerHTML = `<p style="color:red;">加载失败：${err.message}</p>`;
         console.error('获取仓库内容失败:', err);
+        document.getElementById('toc').innerHTML = `
+          <p style="color:red;">
+            <strong>❌ 加载失败：</strong>${err.message}<br><br>
+            <strong>可能原因：</strong><br>
+            • 仓库 <code>${username}/${repo}</code> 是私有的（必须 Public）<br>
+            • 用户名或仓库名拼写错误<br>
+            • API 限流（每小时 60 次，刷新即可）<br>
+            • 网络问题
+          </p>
+        `;
       });
 
     // 加载内容
@@ -101,17 +455,25 @@
       contentDiv.innerHTML = '<p class="loading">加载内容中...</p>';
 
       fetch(url)
-        .then(res => res.text())
+        .then(res => {
+          if (!res.ok) throw new Error(`加载失败: ${res.status}`);
+          return res.text();
+        })
         .then(text => {
-          contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(text));
+          const cleanHtml = DOMPurify.sanitize(marked.parse(text));
+          contentDiv.innerHTML = cleanHtml;
 
-          // 高亮当前章节
-          document.querySelectorAll('.section-list a').forEach(a => a.style.fontWeight = 'normal');
-          const linkEl = document.getElementById(linkId);
-          if (linkEl) linkEl.style.fontWeight = 'bold';
+          setTimeout(() => {
+            document.querySelectorAll('.section-list a').forEach(a => a.style.fontWeight = 'normal');
+            const linkEl = document.getElementById(linkId);
+            if (linkEl) {
+              linkEl.style.fontWeight = 'bold';
+              linkEl.scrollIntoView({ block: 'nearest' });
+            }
+          }, 100);
         })
         .catch(err => {
-          contentDiv.innerHTML = '<p style="color:red;">加载失败</p>';
+          contentDiv.innerHTML = '<p style="color:red;">加载失败，请检查文件是否存在或稍后重试。</p>';
           console.error('加载内容失败:', err);
         });
     }
