@@ -3,46 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📖控制工程自学指南</title>
+  <title>📖 CEBOOK</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.5.7/dist/purify.min.js"></script>
   <style>
     :root {
-      --bg: #f9f9fb;
-      --text: #333;
-      --link: #16a085;
-      --link-hover: #e74c3c;
-      --border: #ddd;
-      --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      --header-border: #3498db;
-      --panel-bg: #fff;
-      --sidebar-bg: #f0f4f8;
-      --code-bg: #f5f5f5;
-      --pre-bg: #2d2d2d;
-      --pre-text: #f8f8f2;
+      --bg: #f6f8fa;
+      --text: #24292f;
+      --link: #0969da;
+      --border: #d0d7de;
+      --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --header-border: #0969da;
+      --panel-bg: #ffffff;
+      --sidebar-bg: #f6f8fa;
+      --code-bg: #f6f8fa;
+      --pre-bg: #f6f8fa;
+      --pre-border: #d0d7de;
+      --pre-text: #24292f;
+      --code-color: #24292f;
+      --inline-code-bg: #f0f2f4;
     }
 
-.dark-mode {
-  --bg: #1a1a1a;
-  --text: #e0e0e0;
-  --link: #3498db;
-  --link-hover: #e67e22;
-  --border: #444;
-  --box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  --header-border: #9b59b6;
-  --panel-bg: #2d2d2d;
-  --sidebar-bg: #222;
-  --code-bg: #333;
-  --pre-bg: #1e1e1e;
-  --pre-text: #dcdcdc;
-}
+    .dark-mode {
+      --bg: #0d1117;
+      --text: #c9d1d9;
+      --link: #58a6ff;
+      --border: #30363d;
+      --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      --header-border: #58a6ff;
+      --panel-bg: #161b22;
+      --sidebar-bg: #0d1117;
+      --code-bg: #161b22;
+      --pre-bg: #0d1117;
+      --pre-border: #30363d;
+      --pre-text: #c9d1d9;
+      --code-color: #c9d1d9;
+      --inline-code-bg: #21262d;
+    }
 
     * {
       box-sizing: border-box;
     }
 
     body {
-      font-family: "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       line-height: 1.7;
       color: var(--text);
       background-color: var(--bg);
@@ -55,8 +59,9 @@
       color: var(--text);
       border-bottom: 1px solid var(--border);
       padding-bottom: 8px;
-      margin-top: 1.5em;
+      margin-top: 1.8em;
       margin-bottom: 0.8em;
+      font-weight: 600;
     }
 
     h1 {
@@ -76,40 +81,56 @@
     }
 
     a:hover {
-      color: var(--link-hover);
       text-decoration: underline;
     }
 
-code {
-  background-color: #f5f5f5; /* 浅灰色背景 */
-  color: #333; /* 黑色文字 */
-  padding: 2px 5px;
-  border-radius: 4px;
-  font-family: "Courier New", monospace;
-  font-size: 0.95em;
-}
+    /* GitHub 风格代码块 */
+    code {
+      background-color: var(--inline-code-bg);
+      color: var(--code-color);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.95em;
+    }
 
-pre {
-  background-color: #2d2d2d; /* 深灰色背景 */
-  color: #f8f8f2; /* 浅灰色文字 */
-  padding: 12px;
-  border-radius: 6px;
-  overflow-x: auto;
-  font-family: "Courier New", monospace;
-  font-size: 0.95em;
-}
+    pre {
+      background-color: var(--pre-bg);
+      border: 1px solid var(--pre-border);
+      border-radius: 6px;
+      padding: 16px;
+      margin: 16px 0;
+      overflow: auto;
+      font-size: 0.95em;
+      line-height: 1.45;
+    }
+
+    pre code {
+      background: none;
+      color: var(--pre-text);
+      padding: 0;
+      font-size: inherit;
+    }
 
     blockquote {
-      border-left: 4px solid var(--link);
+      color: #57606a;
+      border-left: 3px solid #d0d7de;
       margin: 1em 0;
       padding: 0.5em 1em;
-      background-color: rgba(22, 160, 133, 0.1);
+      background-color: #f6f8fa;
+    }
+
+    .dark-mode blockquote {
+      color: #8b949e;
+      border-left-color: #30363d;
+      background-color: #161b22;
     }
 
     img {
       max-width: 100%;
       height: auto;
       border-radius: 6px;
+      border: 1px solid var(--border);
     }
 
     .container {
@@ -184,24 +205,15 @@ pre {
     }
 
     .section-list a:hover {
-      color: var(--link-hover);
+      color: var(--link);
+      text-decoration: underline;
     }
 
     .loading {
       text-align: center;
-      color: #7f8c8d;
+      color: #6e7781;
       font-style: italic;
       padding: 10px 0;
-    }
-
-    #search {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background-color: var(--panel-bg);
-      color: var(--text);
     }
 
     .theme-toggle {
@@ -218,7 +230,7 @@ pre {
     }
 
     .theme-toggle:hover {
-      background-color: var(--link-hover);
+      background-color: #005cc5;
     }
 
     .back-to-top {
@@ -246,36 +258,27 @@ pre {
     footer {
       margin-top: 50px;
       text-align: center;
-      color: #95a5a6;
-      font-size: 0.9em;
+      color: #6e7781;
+      font-size: 0.8em;
       padding: 20px 0;
     }
 
     @media print {
-      .sidebar, .back-to-top, .theme-toggle, #search {
+      .sidebar, .back-to-top, .theme-toggle {
         display: none !important;
       }
       body {
         background: white !important;
         -webkit-print-color-adjust: exact;
       }
-      #html-root.dark-mode {
-        background: white !important;
-        color: black !important;
-      }
       pre, code {
-        background: #f5f5f5 !important;
-        color: #333 !important;
+        background: #f6f8fa !important;
+        color: #24292f !important;
       }
-      .dark-mode code {
-  background-color: #333; /* 深灰色背景 */
-  color: #f8f8f2; /* 浅灰色文字 */
-}
-
-.dark-mode pre {
-  background-color: #1e1e1e; /* 更深的背景 */
-  color: #f8f8f2; /* 浅灰色文字 */
-}
+      .dark-mode pre, .dark-mode code {
+        background: #f6f8fa !important;
+        color: #24292f !important;
+      }
     }
   </style>
 </head>
@@ -283,25 +286,19 @@ pre {
   <div class="container">
     <!-- 侧边栏 -->
     <aside class="sidebar">
-      <h1>📖CEBOOK</h1>
-
-      <input type="text" id="search" placeholder="🔍 搜索章节..." />
+      <h1>📖 CEBOOK</h1>
 
       <button class="theme-toggle" onclick="toggleDarkMode()">🌙 暗色模式</button>
 
       <div class="toc" id="toc">
         <p class="loading">加载目录中...</p>
       </div>
-
-      <footer>
-        © 2025 SAJalon.
-      </footer>
     </aside>
 
     <!-- 主内容区 -->
     <main class="main-content">
       <div id="content">
-        <p>欢迎阅读本书。请在左侧选择章节开始阅读。</p>
+        <p>欢迎阅读 CEBOOK。请在左侧选择章节开始阅读。</p>
       </div>
     </main>
   </div>
@@ -336,22 +333,6 @@ pre {
     window.addEventListener('scroll', () => {
       const btn = document.querySelector('.back-to-top');
       btn.classList.toggle('visible', window.scrollY > 300);
-    });
-
-    // 搜索功能
-    document.getElementById('search').addEventListener('input', function (e) {
-      const query = e.target.value.toLowerCase();
-      if (!query) {
-        document.querySelectorAll('.chapter').forEach(ch => ch.style.display = '');
-        return;
-      }
-      document.querySelectorAll('.chapter').forEach(ch => {
-        const title = ch.querySelector('h3').textContent.toLowerCase();
-        const links = Array.from(ch.querySelectorAll('.section-list a'))
-          .map(a => a.textContent.toLowerCase());
-        const matches = links.some(t => t.includes(query)) || title.includes(query);
-        ch.style.display = matches ? '' : 'none';
-      });
     });
 
     // 获取根目录
@@ -428,12 +409,10 @@ pre {
               const fileLinks = mdFiles.map(file => {
                 const displayName = file.name.replace(/\.md$/, '');
                 const cleanName = displayName.replace(/^\d+-/, '').trim();
-                // ✅ 使用 btoa(encodeURIComponent(file.path)) 安全生成 ID
                 const linkId = `link-${btoa(encodeURIComponent(file.path)).replace(/=/g, '')}`;
 
                 allSections.push({ name: cleanName, path: file.download_url, elementId: linkId });
 
-                // ✅ 关键：使用 file.download_url，避免手动拼接路径
                 return `<a id="${linkId}" href="#" onclick="loadContent('${file.download_url}', '${linkId}'); return false;">${cleanName}</a>`;
               }).join('');
 
@@ -453,7 +432,7 @@ pre {
             <strong>可能原因：</strong><br>
             • 仓库 <code>${username}/${repo}</code> 是私有的（必须 Public）<br>
             • 用户名或仓库名拼写错误<br>
-            • API 限流（每小时 60 次，刷新即可）<br>
+            • API 限流（每小时 60 次，稍后重试）<br>
             • 网络问题
           </p>
         `;
