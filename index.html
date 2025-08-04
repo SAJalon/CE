@@ -396,14 +396,18 @@
                 return;
               }
 
+              let sectionCounter = 0;
               const fileLinks = mdFiles.map(file => {
-                const filePath = `${folder.name}/${file.name}`;
-                const displayName = file.name.replace(/\.md$/, '');
-                const cleanName = displayName.replace(/^\d+-/, '').trim();
-                const linkId = `link-${btoa(filePath).replace(/=/g, '')}`;
-                allSections.push({ name: cleanName, path: file.download_url, elementId: linkId });
-                return `<a id="${linkId}" href="#" onclick="loadContent('${file.download_url}', '${linkId}'); return false;">${cleanName}</a>`;
-              }).join('');
+              const filePath = `${folder.name}/${file.name}`;
+              const displayName = file.name.replace(/\.md$/, '');
+              const cleanName = displayName.replace(/^\d+-/, '').trim();
+  
+              const linkId = `link-${sectionCounter++}`;  // 简单递增 ID
+
+              allSections.push({ name: cleanName, path: file.download_url, elementId: linkId });
+
+              return `<a id="${linkId}" href="#" onclick="loadContent('${file.download_url}', '${linkId}'); return false;">${cleanName}</a>`;
+            }).join('');
 
               listContainer.innerHTML = fileLinks;
             })
