@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>控制工程自学指南</title>
+  <title>CEBOOK</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.5.7/dist/purify.min.js"></script>
   <style>
@@ -193,14 +193,6 @@
       padding: 10px 0;
     }
 
-    #content {
-      background-color: var(--panel-bg);
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: var(--box-shadow);
-      border: 1px solid var(--border);
-    }
-
     #search {
       width: 100%;
       padding: 10px;
@@ -281,7 +273,7 @@
   <div class="container">
     <!-- 侧边栏 -->
     <aside class="sidebar">
-      <h1>控制工程自学指南</h1>
+      <h1>CEBOOK</h1>
 
       <input type="text" id="search" placeholder="🔍 搜索章节..." />
 
@@ -292,14 +284,14 @@
       </div>
 
       <footer>
-        © 2025 SAJalon. 使用 GitHub Pages 发布.
+        © 2025 作者. 使用 GitHub Pages 发布.
       </footer>
     </aside>
 
     <!-- 主内容区 -->
     <main class="main-content">
       <div id="content">
-        <p>欢迎阅读。请在左侧选择章节开始阅读。</p>
+        <p>欢迎阅读本书。请在左侧选择章节开始阅读。</p>
       </div>
     </main>
   </div>
@@ -308,11 +300,13 @@
   <div class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
 
   <script>
-    const username = 'SAJalon';  // 替换为你的 GitHub 用户名
-    const repo = 'CE';            // 替换为你的仓库名
+    // ===== 配置区（请确保正确）=====
+    const username = 'SAJalon';
+    const repo = 'CE';
     const baseUrl = `https://api.github.com/repos/${username}/${repo}/contents`;
+    // ===============================
 
-    let allSections = []; // 用于搜索
+    let allSections = [];
 
     // 检查本地存储的模式
     if (localStorage.getItem('darkMode') === 'enabled') {
@@ -338,7 +332,6 @@
     document.getElementById('search').addEventListener('input', function (e) {
       const query = e.target.value.toLowerCase();
       if (!query) {
-        // 重载所有
         document.querySelectorAll('.chapter').forEach(ch => ch.style.display = '');
         return;
       }
@@ -353,13 +346,26 @@
 
     // 获取根目录
     fetch(baseUrl)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`GitHub API 错误: ${res.status} ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(data => {
-        const folders = data.filter(item => item.type === 'dir').sort((a, b) => a.name.localeCompare(b.name));
+        // ✅ 关键：确保 data 是数组
+        if (!Array.isArray(data)) {
+          throw new Error('GitHub API 返回的数据不是数组。可能是：<br>• 仓库是私有的<br>• 仓库名或用户名错误');
+        }
+
+        const folders = data
+          .filter(item => item.type === 'dir')
+          .sort((a, b) => a.name.localeCompare(b.name));
+
         const tocContainer = document.getElementById('toc');
         tocContainer.innerHTML = '';
 
-        // 先加载 README.md 作为封面
+        // 加载 README.md 作为封面
         const readmeItem = data.find(item => item.name.toLowerCase() === 'readme.md');
         if (readmeItem) {
           fetch(readmeItem.download_url)
@@ -368,7 +374,14 @@
               const contentDiv = document.getElementById('content');
               contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(md));
             })
-            .catch(() => {});
+            .catch(err => {
+              console.warn('加载 README.md 失败', err);
+            });
+        }
+
+        if (folders.length === 0) {
+          tocContainer.innerHTML = '<p>未找到章节目录（没有子文件夹）。</p>';
+          return;
         }
 
         folders.forEach(folder => {
@@ -384,45 +397,61 @@
           tocContainer.insertAdjacentHTML('beforeend', chapterHtml);
 
           fetch(`${baseUrl}/${encodeURIComponent(folder.name)}?ref=main`)
-            .then(res => res.json())
+            .then(res => {
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              return res.json();
+            })
             .then(files => {
+              if (!Array.isArray(files)) {
+                throw new Error('文件夹内容不是数组');
+              }
+
               const mdFiles = files
                 .filter(file => file.name.endsWith('.md'))
                 .sort((a, b) => a.name.localeCompare(b.name));
 
               const listContainer = document.getElementById(`list-${folder.name}`);
               if (mdFiles.length === 0) {
-                listContainer.innerHTML = '<em>暂无内容</em>';
+                listContainer.innerHTML = '<em>暂无 .md 文件</em>';
                 return;
               }
 
-              let sectionCounter = 0;
               const fileLinks = mdFiles.map(file => {
-              const filePath = `${folder.name}/${file.name}`;
-              const displayName = file.name.replace(/\.md$/, '');
-              const cleanName = displayName.replace(/^\d+-/, '').trim();
-  
-              const linkId = `link-${sectionCounter++}`;  // 简单递增 ID
+                const filePath = `${folder.name}/${file.name}`;
+                const displayName = file.name.replace(/\.md$/, '');
+                const cleanName = displayName.replace(/^\d+-/, '').trim();
 
-              allSections.push({ name: cleanName, path: file.download_url, elementId: linkId });
+                // ✅ 安全生成 ID（支持中文）
+                const linkId = `link-${btoa(encodeURIComponent(filePath)).replace(/=/g, '')}`;
 
-              return `<a id="${linkId}" href="#" onclick="loadContent('${file.download_url}', '${linkId}'); return false;">${cleanName}</a>`;
-            }).join('');
+                allSections.push({ name: cleanName, path: file.download_url, elementId: linkId });
+
+                return `<a id="${linkId}" href="#" onclick="loadContent('${file.download_url}', '${linkId}'); return false;">${cleanName}</a>`;
+              }).join('');
 
               listContainer.innerHTML = fileLinks;
             })
             .catch(err => {
-              document.getElementById(`list-${folder.name}`).innerHTML = '<em>加载失败</em>';
-              console.error('加载章节失败:', err);
+              console.error(`加载章节失败: ${folder.name}`, err);
+              document.getElementById(`list-${folder.name}`).innerHTML = `<em style="color:red;">加载失败</em>`;
             });
         });
       })
       .catch(err => {
-        document.getElementById('toc').innerHTML = '<p>无法加载目录，请检查仓库设置。</p>';
         console.error('获取仓库内容失败:', err);
+        document.getElementById('toc').innerHTML = `
+          <p style="color:red;">
+            <strong>❌ 加载失败：</strong>${err.message}<br><br>
+            <strong>可能原因：</strong><br>
+            • 仓库 <code>${username}/${repo}</code> 是私有的（必须设为 Public）<br>
+            • 用户名或仓库名拼写错误<br>
+            • GitHub API 限流（频繁刷新）<br>
+            • 网络问题
+          </p>
+        `;
       });
 
-    // 加载内容并滚动到锚点
+    // 加载内容
     function loadContent(url, linkId) {
       const contentDiv = document.getElementById('content');
       contentDiv.innerHTML = '<p class="loading">加载内容中...</p>';
@@ -433,18 +462,18 @@
           const cleanHtml = DOMPurify.sanitize(marked.parse(text));
           contentDiv.innerHTML = cleanHtml;
 
-          // 滚动到对应链接高亮
+          // 高亮当前章节
           setTimeout(() => {
+            document.querySelectorAll('.section-list a').forEach(a => a.style.fontWeight = 'normal');
             const linkEl = document.getElementById(linkId);
             if (linkEl) {
-              document.querySelectorAll('.section-list a').forEach(a => a.style.fontWeight = 'normal');
               linkEl.style.fontWeight = 'bold';
               linkEl.scrollIntoView({ block: 'nearest' });
             }
           }, 100);
         })
         .catch(err => {
-          contentDiv.innerHTML = '<p style="color:red;">加载内容失败。</p>';
+          contentDiv.innerHTML = '<p style="color:red;">加载内容失败，请检查文件是否存在。</p>';
           console.error('加载内容失败:', err);
         });
     }
