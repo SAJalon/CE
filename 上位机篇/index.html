@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>控制工程自学指南</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.5.7/dist/purify.min.js"></script>
+  <style>
+    :root {
+      --bg: #f9f9fb;
+      --text: #333;
+      --link: #16a085;
+      --link-hover: #e74c3c;
+      --border: #ddd;
+      --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      --header-border: #3498db;
+      --panel-bg: #fff;
+      --sidebar-bg: #f0f4f8;
+      --code-bg: #f5f5f5;
+      --pre-bg: #2d2d2d;
+      --pre-text: #f8f8f2;
+    }
+
+    .dark-mode {
+      --bg: #1a1a1a;
+      --text: #e0e0e0;
+      --link: #3498db;
+      --link-hover: #e67e22;
+      --border: #444;
+      --box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --header-border: #9b59b6;
+      --panel-bg: #2d2d2d;
+      --sidebar-bg: #222;
+      --code-bg: #333;
+      --pre-bg: #1e1e1e;
+      --pre-text: #dcdcdc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-top: 1.5em;
+      margin-bottom: 0.8em;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      border-bottom-color: var(--header-border);
+    }
+
+    h2 {
+      color: var(--link);
+      font-size: 1.4em;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
+
+    pre {
+      background-color: var(--pre-bg);
+      color: var(--pre-text);
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: "Courier New", monospace;
+      font-size: 0.95em;
+    }
+
+    code {
+      background-color: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.95em;
+    }
+
+    blockquote {
+      border-left: 4px solid var(--link);
+      margin: 1em 0;
+      padding: 0.5em 1em;
+      background-color: rgba(22, 160, 133, 0.1);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    @media (min-width: 900px) {
+      .container {
+        flex-direction: row;
+      }
+    }
+
+    .sidebar {
+      width: 100%;
+      background-color: var(--sidebar-bg);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+      order: 2;
+    }
+
+    @media (min-width: 900px) {
+      .sidebar {
+        width: 280px;
+        position: sticky;
+        top: 20px;
+        height: calc(100vh - 40px);
+        overflow-y: auto;
+        order: 1;
+      }
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      order: 1;
+    }
+
+    @media (min-width: 900px) {
+      .main-content {
+        padding: 30px 40px;
+        order: 2;
+      }
+    }
+
+    .toc {
+      margin-bottom: 20px;
+    }
+
+    .chapter {
+      margin-bottom: 18px;
+    }
+
+    .chapter h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.1em;
+      color: var(--link);
+    }
+
+    .section-list {
+      margin: 0 0 0 16px;
+      padding-left: 8px;
+      border-left: 2px solid var(--border);
+      font-size: 0.95em;
+    }
+
+    .section-list a {
+      display: block;
+      padding: 3px 0;
+    }
+
+    .section-list a:hover {
+      color: var(--link-hover);
+    }
+
+    .loading {
+      text-align: center;
+      color: #7f8c8d;
+      font-style: italic;
+      padding: 10px 0;
+    }
+
+    #content {
+      background-color: var(--panel-bg);
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+      border: 1px solid var(--border);
+    }
+
+    #search {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background-color: var(--panel-bg);
+      color: var(--text);
+    }
+
+    .theme-toggle {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: var(--link);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-bottom: 20px;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--link-hover);
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: var(--link);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+    }
+
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      color: #95a5a6;
+      font-size: 0.9em;
+      padding: 20px 0;
+    }
+
+    @media print {
+      .sidebar, .back-to-top, .theme-toggle, #search {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        -webkit-print-color-adjust: exact;
+      }
+      #html-root.dark-mode {
+        background: white !important;
+        color: black !important;
+      }
+      pre, code {
+        background: #f5f5f5 !important;
+        color: #333 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+      <h1>控制工程自学指南</h1>
+
+      <input type="text" id="search" placeholder="🔍 搜索章节..." />
+
+      <button class="theme-toggle" onclick="toggleDarkMode()">🌙 暗色模式</button>
+
+      <div class="toc" id="toc">
+        <p class="loading">加载目录中...</p>
+      </div>
+
+      <footer>
+        © 2025 SAJalon. 使用 GitHub Pages 发布.
+      </footer>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+      <div id="content">
+        <p>欢迎阅读。请在左侧选择章节开始阅读。</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- 返回顶部按钮 -->
+  <div class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
+
+  <script>
+    const username = 'SAJalon';  // 替换为你的 GitHub 用户名
+    const repo = 'CE';            // 替换为你的仓库名
+    const baseUrl = `https://api.github.com/repos/${username}/${repo}/contents`;
+
+    let allSections = []; // 用于搜索
+
+    // 检查本地存储的模式
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.documentElement.classList.add('dark-mode');
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark-mode');
+      if (document.documentElement.classList.contains('dark-mode')) {
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    }
+
+    // 显示返回顶部按钮
+    window.addEventListener('scroll', () => {
+      const btn = document.querySelector('.back-to-top');
+      btn.classList.toggle('visible', window.scrollY > 300);
+    });
+
+    // 搜索功能
+    document.getElementById('search').addEventListener('input', function (e) {
+      const query = e.target.value.toLowerCase();
+      if (!query) {
+        // 重载所有
+        document.querySelectorAll('.chapter').forEach(ch => ch.style.display = '');
+        return;
+      }
+      document.querySelectorAll('.chapter').forEach(ch => {
+        const title = ch.querySelector('h3').textContent.toLowerCase();
+        const links = Array.from(ch.querySelectorAll('.section-list a'))
+          .map(a => a.textContent.toLowerCase());
+        const matches = links.some(t => t.includes(query)) || title.includes(query);
+        ch.style.display = matches ? '' : 'none';
+      });
+    });
+
+    // 获取根目录
+    fetch(baseUrl)
+      .then(res => res.json())
+      .then(data => {
+        const folders = data.filter(item => item.type === 'dir').sort((a, b) => a.name.localeCompare(b.name));
+        const tocContainer = document.getElementById('toc');
+        tocContainer.innerHTML = '';
+
+        // 先加载 README.md 作为封面
+        const readmeItem = data.find(item => item.name.toLowerCase() === 'readme.md');
+        if (readmeItem) {
+          fetch(readmeItem.download_url)
+            .then(r => r.text())
+            .then(md => {
+              const contentDiv = document.getElementById('content');
+              contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(md));
+            })
+            .catch(() => {});
+        }
+
+        folders.forEach(folder => {
+          const folderId = `folder-${folder.name.replace(/[^a-z0-9]/gi, '-')}`;
+          const chapterHtml = `
+            <div class="chapter" id="${folderId}">
+              <h3>${folder.name}</h3>
+              <div class="section-list" id="list-${folder.name}">
+                <p class="loading">加载中...</p>
+              </div>
+            </div>
+          `;
+          tocContainer.insertAdjacentHTML('beforeend', chapterHtml);
+
+          fetch(`${baseUrl}/${encodeURIComponent(folder.name)}?ref=main`)
+            .then(res => res.json())
+            .then(files => {
+              const mdFiles = files
+                .filter(file => file.name.endsWith('.md'))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+              const listContainer = document.getElementById(`list-${folder.name}`);
+              if (mdFiles.length === 0) {
+                listContainer.innerHTML = '<em>暂无内容</em>';
+                return;
+              }
+
+              const fileLinks = mdFiles.map(file => {
+                const filePath = `${folder.name}/${file.name}`;
+                const displayName = file.name.replace(/\.md$/, '');
+                const cleanName = displayName.replace(/^\d+-/, '').trim();
+                const linkId = `link-${btoa(filePath).replace(/=/g, '')}`;
+                allSections.push({ name: cleanName, path: file.download_url, elementId: linkId });
+                return `<a id="${linkId}" href="#" onclick="loadContent('${file.download_url}', '${linkId}'); return false;">${cleanName}</a>`;
+              }).join('');
+
+              listContainer.innerHTML = fileLinks;
+            })
+            .catch(err => {
+              document.getElementById(`list-${folder.name}`).innerHTML = '<em>加载失败</em>';
+              console.error('加载章节失败:', err);
+            });
+        });
+      })
+      .catch(err => {
+        document.getElementById('toc').innerHTML = '<p>无法加载目录，请检查仓库设置。</p>';
+        console.error('获取仓库内容失败:', err);
+      });
+
+    // 加载内容并滚动到锚点
+    function loadContent(url, linkId) {
+      const contentDiv = document.getElementById('content');
+      contentDiv.innerHTML = '<p class="loading">加载内容中...</p>';
+
+      fetch(url)
+        .then(res => res.text())
+        .then(text => {
+          const cleanHtml = DOMPurify.sanitize(marked.parse(text));
+          contentDiv.innerHTML = cleanHtml;
+
+          // 滚动到对应链接高亮
+          setTimeout(() => {
+            const linkEl = document.getElementById(linkId);
+            if (linkEl) {
+              document.querySelectorAll('.section-list a').forEach(a => a.style.fontWeight = 'normal');
+              linkEl.style.fontWeight = 'bold';
+              linkEl.scrollIntoView({ block: 'nearest' });
+            }
+          }, 100);
+        })
+        .catch(err => {
+          contentDiv.innerHTML = '<p style="color:red;">加载内容失败。</p>';
+          console.error('加载内容失败:', err);
+        });
+    }
+  </script>
+</body>
+</html>
